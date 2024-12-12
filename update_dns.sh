@@ -7,18 +7,19 @@ DOMAIN="$DOMAIN"
 SUBDOMAIN="$SUBDOMAIN"
 # Set the TTL value for the DNS A record in seconds (default is 1800 seconds / 30 minutes)
 TTL="$TTL"
-
+IP_VER=$1 # 4 or 6
+RECORD=$2 # A or AAAA
 IPLOOKUP="$IPLOOKUP"
 
 # Set the log file path
 LOG_FILE="/var/log/update_dns.log"
 
 # Get the current external IP address
-CURRENT_IP=$(curl -s $IPLOOKUP)
+CURRENT_IP=$(curl -$IP_VER -s $IPLOOKUP)
 
 # Get the IP address and TTL of the DNS A record via the Gandi API
 DNS_INFO=$(curl -s -H "$AUTORIZATION" \
-     "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
+     "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/$RECORD")
 
 # Check if the DNS record exists
 if [ -z "$DNS_INFO" ]; then
@@ -47,7 +48,7 @@ if [ "$CURRENT_IP" != "$DNS_IP" ]; then
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
          -X PUT -H "Content-Type: application/json" -H "$AUTORIZATION" \
          -d '{"rrset_values": ["'$CURRENT_IP'"], "rrset_ttl": '$TTL'}' \
-         "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
+         "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/$RECORD")
 
     if [ "$RESPONSE" == "200" ] || [ "$RESPONSE" == "201" ]; then
         # Log when the DNS record is updated

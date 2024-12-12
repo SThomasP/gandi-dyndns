@@ -1,2 +1,1 @@
-*/30 * * * * /bin/sh /usr/local/bin/update_dns.sh
-
+*/30 * * * * /bin/sh /usr/local/bin/update_dns.sh 4 A
