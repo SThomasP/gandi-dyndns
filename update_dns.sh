@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Set your Gandi API key, domain name, and subdomain
-GANDI_API_KEY="$GANDI_API_KEY"
+GANDI_TOKEN="$GANDI_TOKEN"
+AUTORIZATION="Authorization: Bearer $GANDI_TOKEN"
 DOMAIN="$DOMAIN"
 SUBDOMAIN="$SUBDOMAIN"
 # Set the TTL value for the DNS A record in seconds (default is 1800 seconds / 30 minutes)
@@ -16,7 +17,7 @@ LOG_FILE="/var/log/update_dns.log"
 CURRENT_IP=$(curl -s $IPLOOKUP)
 
 # Get the IP address and TTL of the DNS A record via the Gandi API
-DNS_INFO=$(curl -s -H "Authorization: Apikey $GANDI_API_KEY" \
+DNS_INFO=$(curl -s -H "$AUTORIZATION" \
      "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
 
 # Check if the DNS record exists
@@ -44,7 +45,7 @@ if [ "$CURRENT_IP" != "$DNS_IP" ]; then
 
     # Update the DNS A record via the Gandi API
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-         -X PUT -H "Content-Type: application/json" -H "Authorization: Apikey $GANDI_API_KEY" \
+         -X PUT -H "Content-Type: application/json" -H "$AUTORIZATION" \
          -d '{"rrset_values": ["'$CURRENT_IP'"], "rrset_ttl": '$TTL'}' \
          "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
 
